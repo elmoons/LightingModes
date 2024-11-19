@@ -7,8 +7,8 @@ lighting_modes = {
 
 class LightingModes:
     def __init__(self):
-        self.current_mode = "day"
-        self.brightness = lighting_modes[self.current_mode]["brightness"]
+        self.current_mode = None
+        self.brightness = None
 
     def set_mode(self, mode):
         if mode in lighting_modes:
@@ -71,3 +71,6 @@ lighting_system.adjust_brightness_on_detection(human_detected=True, cloudly=0, i
 # День + облачно без человека
 lighting_system.adjust_brightness_on_detection(human_detected=False, cloudly=50, is_day=True)
 
+lighting_system.set_custom_mode(40, False)
+
+lighting_system.apply_mode()
