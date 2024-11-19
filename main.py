@@ -1,14 +1,14 @@
 lighting_modes = {
-    "work": {"brightness": 50, "human_detect": True},
-    "night": {"brightness": 10, "human_detect": True},
-    "energy_saving": {"brightness": 25, "human_detect": True}
+    "day": {"brightness": 10, "human_detect": True},
+    "night": {"brightness": 20, "human_detect": True},
+    "energy_saving": {"brightness": 5, "human_detect": True}
 }
 
 
 class LightingModes:
     def __init__(self):
-        self.current_mode = "work"
-        self.brightness = 50
+        self.current_mode = "day"
+        self.brightness = lighting_modes[self.current_mode]["brightness"]
 
     def set_mode(self, mode):
         if mode in lighting_modes:
@@ -27,31 +27,47 @@ class LightingModes:
         self.set_mode("custom")
 
     def adjust_brightness_on_detection(self, human_detected: bool, is_day: bool, cloudly: int):
-        if lighting_modes[self.current_mode]["human_detect"] and human_detected:
-            # Повышаем яркость на коэффициент по формуле x = (cloudly * 0,7)
-            self.brightness = min(self.brightness + (cloudly * 0.7), 100)
-            if is_day is False:
-                self.brightness = min(self.brightness + (0.6 * self.brightness), 100)
-            print(f"Человек обнаружен. Яркость: {self.brightness}%. День: {is_day}")
-        elif not human_detected:
-            # Возвращаем яркость к стандартной
-            self.brightness = lighting_modes[self.current_mode]["brightness"]
-            print(f"Человек не обнаружен. Яркость: {self.brightness}%. День: {is_day}")
+        base_brightness = lighting_modes[self.current_mode]["brightness"]
+
+        if is_day:
+            if human_detected:
+                # День + облачность с человеком
+                self.brightness = base_brightness + (cloudly * 0.7) if cloudly > 0 else base_brightness + (cloudly * 0.4)
+            else:
+                # День + облачность без человека
+                self.brightness = base_brightness + (cloudly * 0.7) if cloudly > 0 else 0
+        else:
+            if human_detected:
+                # Ночь с человеком
+                self.brightness = 100
+            else:
+                # Ночь без человека
+                self.brightness = base_brightness
+
+        # Ограничение яркости в диапазоне [0, 100]
+        self.brightness = max(0, min(self.brightness, 100))
+
+        print(f"Человек обнаружен: {human_detected}. День: {is_day}. Облачность: {cloudly}%. Яркость: {self.brightness}%.")
 
 
+# Пример использования
 lighting_system = LightingModes()
 
-# Устанавливаем рабочий режим
+# Устанавливаем ночной режим
 lighting_system.set_mode("night")
 
-# Обнаружен человек
+# Ночь + человек
+lighting_system.adjust_brightness_on_detection(human_detected=True, cloudly=50, is_day=False)
+
+# Ночь без человека
+lighting_system.adjust_brightness_on_detection(human_detected=False, cloudly=50, is_day=False)
+
+# День + облачно + человек
 lighting_system.adjust_brightness_on_detection(human_detected=True, cloudly=50, is_day=True)
 
-# Человек ушел
-lighting_system.adjust_brightness_on_detection(human_detected=False, cloudly=10, is_day=False)
+# День + ясно + человек
+lighting_system.adjust_brightness_on_detection(human_detected=True, cloudly=0, is_day=True)
 
-# # Устанавливаем кастомный режим
-# lighting_system.set_custom_mode(25, True, )
-#
-# # Кастомный режим
-# lighting_system.adjust_brightness_on_detection(human_detected=True, cloudly=10, is_day=True)
+# День + облачно без человека
+lighting_system.adjust_brightness_on_detection(human_detected=False, cloudly=50, is_day=True)
+
