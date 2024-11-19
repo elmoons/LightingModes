@@ -1,14 +1,14 @@
 lighting_modes = {
-    "work": {"brightness": 60, "human_detect": True},
+    "work": {"brightness": 50, "human_detect": True},
     "night": {"brightness": 10, "human_detect": True},
-    "energy_saving": {"brightness": 40, "human_detect": True}
+    "energy_saving": {"brightness": 25, "human_detect": True}
 }
 
 
 class LightingModes:
     def __init__(self):
         self.current_mode = "work"
-        self.brightness = 80
+        self.brightness = 50
 
     def set_mode(self, mode):
         if mode in lighting_modes:
@@ -30,14 +30,12 @@ class LightingModes:
         if lighting_modes[self.current_mode]["human_detect"] and human_detected:
             # Повышаем яркость на коэффициент по формуле x = (cloudly * 0,7)
             self.brightness = min(self.brightness + (cloudly * 0.7), 100)
-            if is_day:
+            if is_day is False:
                 self.brightness = min(self.brightness + (0.6 * self.brightness), 100)
             print(f"Человек обнаружен. Яркость: {self.brightness}%. День: {is_day}")
         elif not human_detected:
             # Возвращаем яркость к стандартной
             self.brightness = lighting_modes[self.current_mode]["brightness"]
-            if is_day:
-                self.brightness = min(self.brightness + (0.6 * self.brightness), 100)
             print(f"Человек не обнаружен. Яркость: {self.brightness}%. День: {is_day}")
 
 
@@ -47,13 +45,13 @@ lighting_system = LightingModes()
 lighting_system.set_mode("night")
 
 # Обнаружен человек
-lighting_system.adjust_brightness_on_detection(human_detected=True, cloudly=50, is_day=False)
+lighting_system.adjust_brightness_on_detection(human_detected=True, cloudly=50, is_day=True)
 
 # Человек ушел
 lighting_system.adjust_brightness_on_detection(human_detected=False, cloudly=10, is_day=False)
 
-# Устанавливаем кастомный режим
-lighting_system.set_custom_mode(25, True, )
-
-# Кастомный режим
-lighting_system.adjust_brightness_on_detection(human_detected=True, cloudly=10, is_day=True)
+# # Устанавливаем кастомный режим
+# lighting_system.set_custom_mode(25, True, )
+#
+# # Кастомный режим
+# lighting_system.adjust_brightness_on_detection(human_detected=True, cloudly=10, is_day=True)
